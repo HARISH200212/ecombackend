@@ -26,9 +26,22 @@ const SERVER_URL = (
     ''
 ).trim().replace(/\/$/, '');
 
+const sanitizeExplicitCallback = (url) => {
+    if (!url || !url.trim()) return null;
+    const value = url.trim();
+
+    // Prevent production misconfiguration where callback is accidentally set to localhost.
+    if (process.env.NODE_ENV === 'production' && /localhost|127\.0\.0\.1/i.test(value)) {
+        return null;
+    }
+
+    return value;
+};
+
 const buildCallbackUrl = (path, explicitUrl) => {
-    if (explicitUrl && explicitUrl.trim()) {
-        return explicitUrl.trim();
+    const safeExplicit = sanitizeExplicitCallback(explicitUrl);
+    if (safeExplicit) {
+        return safeExplicit;
     }
     if (!SERVER_URL) {
         // Local dev: relative path, Passport resolves against incoming request host.
