@@ -25,9 +25,24 @@ const reviewRoutes = require("./routes/review.routes");
 
 const app = express();
 const server = http.createServer(app);
+const normalizeOrigin = (value) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed;
+    }
+    return `https://${trimmed}`;
+};
+
+const configuredClientOrigins = (process.env.CLIENT_URL || '')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
 const allowedOrigins = [
     "http://localhost:5173",
-    ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(url => url.trim()) : [])
+    ...configuredClientOrigins
 ];
 
 const io = new Server(server, {

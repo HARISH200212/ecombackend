@@ -12,9 +12,21 @@ console.log('[Passport Config] X Consumer Key:', process.env.X_CONSUMER_KEY ? 'L
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID?.trim();
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET?.trim();
+const SERVER_URL = (process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:5000').trim();
+
+const buildCallbackUrl = (path, explicitUrl) => {
+    if (explicitUrl && explicitUrl.trim()) {
+        return explicitUrl.trim();
+    }
+    return `${SERVER_URL.replace(/\/$/, '')}${path}`;
+};
+
+const GOOGLE_CALLBACK_URL = buildCallbackUrl('/api/auth/google/callback', process.env.GOOGLE_CALLBACK_URL);
+const FACEBOOK_CALLBACK_URL = buildCallbackUrl('/api/auth/facebook/callback', process.env.FACEBOOK_CALLBACK_URL);
 
 console.log('[Passport Debug] GOOGLE_CLIENT_ID Length:', GOOGLE_CLIENT_ID?.length);
 console.log('[Passport Debug] GOOGLE_CLIENT_SECRET Length:', GOOGLE_CLIENT_SECRET?.length);
+console.log('[Passport Debug] Google Callback URL:', GOOGLE_CALLBACK_URL);
 
 // Google Strategy
 passport.use(
@@ -22,7 +34,7 @@ passport.use(
         {
             clientID: GOOGLE_CLIENT_ID,
             clientSecret: GOOGLE_CLIENT_SECRET,
-            callbackURL: 'http://localhost:5000/api/auth/google/callback', // Using absolute for clarity
+            callbackURL: GOOGLE_CALLBACK_URL,
             scope: ['profile', 'email'],
             proxy: true
         },
@@ -65,7 +77,7 @@ passport.use(
         {
             clientID: process.env.FACEBOOK_APP_ID,
             clientSecret: process.env.FACEBOOK_APP_SECRET,
-            callbackURL: 'http://localhost:5000/api/auth/facebook/callback',
+            callbackURL: FACEBOOK_CALLBACK_URL,
             profileFields: ['id', 'displayName', 'emails', 'photos'],
             proxy: true
         },

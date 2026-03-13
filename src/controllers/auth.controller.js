@@ -8,6 +8,15 @@ const twilioClient = (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOU
     ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) 
     : null;
 
+const getClientUrl = () => {
+    const raw = (process.env.CLIENT_URL || "http://localhost:5173").trim();
+    if (!raw) return "http://localhost:5173";
+    if (raw.startsWith("http://") || raw.startsWith("https://")) {
+        return raw;
+    }
+    return `https://${raw}`;
+};
+
 exports.register = async (req, res) => {
     try {
         const { name, email, password, phone, projectName } = req.body || {};
@@ -85,21 +94,21 @@ exports.googleCallback = (req, res, next) => {
             return res.status(500).json({ message: "Google auth failed", error: err.message });
         }
         if (!user) {
-            return res.redirect((process.env.CLIENT_URL || "http://localhost:5173") + "/login?error=failed");
+            return res.redirect(`${getClientUrl()}/login?error=failed`);
         }
         req.logIn(user, (err) => {
             if (err) return next(err);
-            return res.redirect(process.env.CLIENT_URL || "http://localhost:5173");
+            return res.redirect(getClientUrl());
         });
     })(req, res, next);
 };
 
 exports.facebookCallback = (req, res) => {
-    res.redirect(process.env.CLIENT_URL || "http://localhost:5173");
+    res.redirect(getClientUrl());
 };
 
 exports.xCallback = (req, res) => {
-    res.redirect(process.env.CLIENT_URL || "http://localhost:5173");
+    res.redirect(getClientUrl());
 };
 
 exports.loginSuccess = (req, res) => {
@@ -117,7 +126,7 @@ exports.loginFailure = (req, res) => {
 exports.logout = (req, res, next) => {
     req.logout((err) => {
         if (err) return next(err);
-        res.redirect(process.env.CLIENT_URL || "http://localhost:5173");
+        res.redirect(getClientUrl());
     });
 };
 
