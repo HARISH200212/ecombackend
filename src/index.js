@@ -6,6 +6,7 @@ const cors = require("cors");
 const session = require("express-session");
 const MongoStore = require("connect-mongo").default;
 const passport = require("passport");
+const helmet = require("helmet"); // Added helmet
 const connectDB = require("./config/database");
 
 // Load passport config
@@ -33,6 +34,20 @@ const io = new Server(server, {
 });
 
 // Middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"],
+            connectSrc: ["'self'", "https://api.qrserver.com", "https://raw.githubusercontent.com", "ws:", "wss:"],
+            frameSrc: ["'self'", "https://js.stripe.com"],
+            imgSrc: ["'self'", "data:", "https://api.qrserver.com", "https://images.unsplash.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            upgradeInsecureRequests: [],
+        },
+    },
+}));
 app.use(express.json());
 // Inject socket.io instance to the request object
 app.use((req, res, next) => {
