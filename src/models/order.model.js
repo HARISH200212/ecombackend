@@ -23,7 +23,9 @@ const orderSchema = new mongoose.Schema({
     status: { type: String, default: 'Pending' },
     transactionId: { type: String },
     invoiceNumber: { type: String },
-    invoiceGeneratedAt: { type: Date }
+    invoiceGeneratedAt: { type: Date },
+    cancellationReason: { type: String },
+    returnReason: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

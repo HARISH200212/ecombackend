@@ -1,4 +1,4 @@
-const { sendOrderConfirmation, sendStatusUpdateEmail } = require('./email.service');
+const { sendOrderConfirmation, sendStatusUpdateEmail, sendDailySummaryEmail } = require('./email.service');
 const { sendOrderSms } = require('./sms.service');
 
 /**

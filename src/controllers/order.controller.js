@@ -48,6 +48,7 @@ exports.createOrder = async (req, res) => {
                 {
                     _id: order.id,
                     totalAmount: Number(order.total),
+                    shippingAddress: { address: order.customer?.address || '' },
                     status: order.paymentStatus || 'Paid',
                     items: order.items || [],
                     date: order.createdAt || new Date(),
@@ -87,9 +88,14 @@ exports.updateOrderStatus = async (req, res) => {
         const { id } = req.params;
         const { status, customer, order } = req.body;
 
+        const updateFields = { status };
+        if (reason) updateFields.cancellationReason = reason;
+        if (status === 'Return Requested' || status === 'Exchange Requested') {
+            updateFields.returnReason = reason || '';
+        }
         const updatedOrder = await Order.findOneAndUpdate(
             { id: id },
-            { status: status },
+            { $set: updateFields },
             { new: true }
         );
 
