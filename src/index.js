@@ -25,6 +25,9 @@ const reviewRoutes = require("./routes/review.routes");
 
 const app = express();
 const server = http.createServer(app);
+
+// Required on Render/other proxies so secure session cookies are handled correctly.
+app.set("trust proxy", 1);
 const normalizeOrigin = (value) => {
     if (!value) return null;
     const trimmed = value.trim();
@@ -121,7 +124,9 @@ app.use(session({
         collectionName: 'sessions'
     }),
     cookie: {
+        httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
