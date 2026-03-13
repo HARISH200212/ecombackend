@@ -12,17 +12,29 @@ console.log('[Passport Config] X Consumer Key:', process.env.X_CONSUMER_KEY ? 'L
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID?.trim();
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET?.trim();
-const SERVER_URL = (process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || '').trim();
+
+// RENDER env var is automatically injected by Render on all web services.
+const RENDER_ORIGIN = process.env.RENDER_EXTERNAL_URL
+    ? process.env.RENDER_EXTERNAL_URL.trim().replace(/\/$/, '')
+    : process.env.RENDER
+        ? 'https://ecombackend-tcey.onrender.com'
+        : null;
+
+const SERVER_URL = (
+    process.env.SERVER_URL ||
+    RENDER_ORIGIN ||
+    ''
+).trim().replace(/\/$/, '');
 
 const buildCallbackUrl = (path, explicitUrl) => {
     if (explicitUrl && explicitUrl.trim()) {
         return explicitUrl.trim();
     }
     if (!SERVER_URL) {
-        // Relative callback lets Passport derive host from the incoming request.
+        // Local dev: relative path, Passport resolves against incoming request host.
         return path;
     }
-    return `${SERVER_URL.replace(/\/$/, '')}${path}`;
+    return `${SERVER_URL}${path}`;
 };
 
 const GOOGLE_CALLBACK_URL = buildCallbackUrl('/api/auth/google/callback', process.env.GOOGLE_CALLBACK_URL);

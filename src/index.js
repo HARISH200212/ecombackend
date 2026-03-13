@@ -41,6 +41,17 @@ const normalizeOrigin = (value) => {
     }
 };
 
+const configuredClientOrigins = (process.env.CLIENT_URL || '')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://khm-electronics-5st7.vercel.app',
+    ...configuredClientOrigins
+];
+
 const isAllowedOrigin = (origin) => {
     if (!origin) return true;
     const normalized = normalizeOrigin(origin);
@@ -50,19 +61,9 @@ const isAllowedOrigin = (origin) => {
         return true;
     }
 
-    // Allow Vercel preview and production domains for this project.
+    // Allow Vercel preview deploy URLs for this project.
     return /^https:\/\/([a-z0-9-]+\.)?khm-electronics-5st7\.vercel\.app$/i.test(normalized);
 };
-
-const configuredClientOrigins = (process.env.CLIENT_URL || '')
-    .split(',')
-    .map(normalizeOrigin)
-    .filter(Boolean);
-
-const allowedOrigins = [
-    "http://localhost:5173",
-    ...configuredClientOrigins
-];
 
 const io = new Server(server, {
     cors: {
