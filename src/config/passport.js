@@ -12,11 +12,15 @@ console.log('[Passport Config] X Consumer Key:', process.env.X_CONSUMER_KEY ? 'L
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID?.trim();
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET?.trim();
-const SERVER_URL = (process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:5000').trim();
+const SERVER_URL = (process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || '').trim();
 
 const buildCallbackUrl = (path, explicitUrl) => {
     if (explicitUrl && explicitUrl.trim()) {
         return explicitUrl.trim();
+    }
+    if (!SERVER_URL) {
+        // Relative callback lets Passport derive host from the incoming request.
+        return path;
     }
     return `${SERVER_URL.replace(/\/$/, '')}${path}`;
 };

@@ -11,10 +11,16 @@ const twilioClient = (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOU
 const getClientUrl = () => {
     const raw = (process.env.CLIENT_URL || "http://localhost:5173").trim();
     if (!raw) return "http://localhost:5173";
-    if (raw.startsWith("http://") || raw.startsWith("https://")) {
-        return raw;
+    const withProtocol = raw.startsWith("http://") || raw.startsWith("https://")
+        ? raw
+        : `https://${raw}`;
+
+    try {
+        const parsed = new URL(withProtocol);
+        return `${parsed.protocol}//${parsed.host}`;
+    } catch (_err) {
+        return "http://localhost:5173";
     }
-    return `https://${raw}`;
 };
 
 exports.register = async (req, res) => {

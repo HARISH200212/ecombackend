@@ -29,10 +29,29 @@ const normalizeOrigin = (value) => {
     if (!value) return null;
     const trimmed = value.trim();
     if (!trimmed) return null;
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-        return trimmed;
+    const withProtocol = (trimmed.startsWith('http://') || trimmed.startsWith('https://'))
+        ? trimmed
+        : `https://${trimmed}`;
+
+    try {
+        const parsed = new URL(withProtocol);
+        return `${parsed.protocol}//${parsed.host}`.toLowerCase();
+    } catch (_err) {
+        return null;
     }
-    return `https://${trimmed}`;
+};
+
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true;
+    const normalized = normalizeOrigin(origin);
+    if (!normalized) return false;
+
+    if (allowedOrigins.includes(normalized)) {
+        return true;
+    }
+
+    // Allow Vercel preview and production domains for this project.
+    return /^https:\/\/([a-z0-9-]+\.)?khm-electronics-5st7\.vercel\.app$/i.test(normalized);
 };
 
 const configuredClientOrigins = (process.env.CLIENT_URL || '')
@@ -48,7 +67,7 @@ const allowedOrigins = [
 const io = new Server(server, {
     cors: {
         origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin)) {
+            if (isAllowedOrigin(origin)) {
                 callback(null, true);
             } else {
                 callback(new Error("Not allowed by CORS"));
@@ -82,7 +101,7 @@ app.use((req, res, next) => {
 });
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (isAllowedOrigin(origin)) {
             callback(null, true);
         } else {
             callback(new Error("Not allowed by CORS"));
