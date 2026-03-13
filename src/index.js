@@ -133,6 +133,10 @@ if (process.env.MONGO_URI) {
 }
 
 // Routes
+app.get("/", (_req, res) => {
+    res.status(200).send("API IS WORKING");
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
