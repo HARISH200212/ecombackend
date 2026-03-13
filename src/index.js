@@ -147,12 +147,19 @@ const PORT = process.env.PORT || 5000;
 
 // Serve Static Frontend in Production
 if (process.env.NODE_ENV === "production") {
+    const fs = require("fs");
     const path = require("path");
-    app.use(express.static(path.join(__dirname, "../../client/dist")));
-    
-    app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "../../client", "dist", "index.html"));
-    });
+    const clientDistDir = path.join(__dirname, "../../client/dist");
+    const clientIndexFile = path.join(clientDistDir, "index.html");
+
+    if (fs.existsSync(clientIndexFile)) {
+        app.use(express.static(clientDistDir));
+        app.get("*", (req, res) => {
+            res.sendFile(clientIndexFile);
+        });
+    } else {
+        console.warn("[Server] client/dist not found. Skipping static file serving.");
+    }
 }
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
